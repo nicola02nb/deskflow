@@ -337,7 +337,7 @@ jobs:
         run: |
 
           $packageId = "Deskflow.Deskflow(64-bit)"
-          $gitToken = "${{ secrets.DEPLOY_TOKEN }}"
+          $gitToken = "${{ secrets.WINGET_DEPLOY_TOKEN }}"
           
           $packageVersion = "${{env.DESKFLOW_VERSION}}"
           $installerUrl = "https://github.com/deskflow/deskflow/releases/download/continuous/deskflow_${packageVersion}_windows_x64.msi"
