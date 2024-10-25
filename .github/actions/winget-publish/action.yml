@@ -1,0 +1,40 @@
+name: Winget Publish
+description: A composite action to publish packages to the Windows Package Manager (Winget) repository
+
+inputs:
+  release-version:
+    description: "Version to publish to Winget package manager (without 'v' prefix)"
+    required: true
+  package-id:
+    description: "Package identifier in Winget repository"
+    required: true
+    default: "Deskflow.Deskflow(64-bit)"
+  token:
+    description: "GitHub token with permissions to submit to Winget repository"
+    required: true
+  installer-url-template:
+    description: "Template for installer URL. Use {version} as placeholder"
+    required: true
+    default: "https://github.com/deskflow/deskflow/releases/download/v{version}/deskflow_{version}_windows_x64.msi"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Submit package to Windows Package Manager Community Repository
+      if: runner.os == 'Windows'
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        # Download latest wingetcreate
+        Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+        
+        # Replace {version} in template with actual version
+        $installerUrl = "${{ inputs.installer-url-template }}".Replace("{version}", "${{ inputs.release-version }}")
+        
+        # Submit package update
+        .\wingetcreate.exe update "${{ inputs.package-id }}" `
+          --version "${{ inputs.release-version }}" `
+          --urls "$installerUrl" `
+          --submit `
+          --token "${{ inputs.token }}"
+      shell: pwsh
