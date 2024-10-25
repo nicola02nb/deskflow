@@ -327,3 +327,20 @@ jobs:
           prerelease: false
           files: |
             package-*/*
+            
+  winget:
+    needs: release
+    name: Publish winget package
+    runs-on: windows-latest
+    steps:
+      - name: Submit package to Windows Package Manager Community Repository
+        run: |
+
+          $packageId = "Deskflow.Deskflow(64-bit)"
+          #$gitToken = "${{ secrets.DEPLOY_TOKEN }}" 
+
+          $packageVersion = $targetRelease.tag_name.Trim("v")
+          $installerUrl = "https://github.com/deskflow/deskflow/releases/download/continuous/deskflow_${packageVersion}_windows_x64.msi"
+
+          Invoke-WebRequest https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          .\wingetcreate.exe update $packageId --version $packageVersion --urls "$installerUrl" --submit --token $gitToken
